@@ -2,6 +2,7 @@ package dev.michaud.greenpanda.playercompass.events;
 
 import dev.michaud.greenpanda.playercompass.gui.CompassInventory;
 import dev.michaud.greenpanda.playercompass.items.Compass;
+import dev.michaud.greenpanda.playercompass.util.Format;
 import dev.michaud.greenpanda.playercompass.util.PlayerDistance;
 import dev.michaud.greenpanda.playercompass.util.SortByDistance;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -36,28 +38,31 @@ public class CompassRightClick implements Listener {
   public static void onRightClick(PlayerInteractEvent event) {
 
     if (event.getAction() != Action.RIGHT_CLICK_AIR
-        && event.getAction() != Action.RIGHT_CLICK_BLOCK) {
+        && event.getAction() != Action.RIGHT_CLICK_BLOCK
+        && event.getAction() != Action.LEFT_CLICK_AIR) {
       return;
     }
 
     ItemStack eventItem = event.getItem();
 
+    if (eventItem == null || eventItem.getType() != Material.COMPASS) {
+      return;
+    }
+
     if (Compass.customItem.isType(eventItem)) {
-      playerCompassRightClick(event);
+      playerCompassRightClick(event.getPlayer(), eventItem);
     } else {
       compassRightClick(event);
     }
 
   }
 
-  private static void playerCompassRightClick(PlayerInteractEvent event) {
+  private static void playerCompassRightClick(Player player, ItemStack item) {
 
-    Player player = event.getPlayer();
     boolean success = openCompassGUI(player);
 
     if (!success) {
-      ItemStack compass = Objects.requireNonNull(event.getItem());
-      Compass.customItem.clearLocation(compass);
+      Compass.customItem.clearLocation(item);
       player.sendActionBar(Component.text("There are currently no players to track"));
     }
   }
@@ -67,16 +72,13 @@ public class CompassRightClick implements Listener {
     Block clickedBlock = event.getClickedBlock();
     ItemStack compass = event.getItem();
 
-    if (clickedBlock == null || compass == null) {
-      return;
-    }
-
-    if (clickedBlock.getType() != Material.LODESTONE) {
+    if (clickedBlock == null || compass == null
+        || clickedBlock.getType() != Material.LODESTONE) {
       return;
     }
 
     CompassMeta meta = (CompassMeta) compass.getItemMeta();
-    Location location = meta.getLodestone();
+    Location location = clickedBlock.getLocation();
 
     List<Component> lore = new ArrayList<>();
     String coords = "XYZ: " + location.getBlockX() + " / " + location.getBlockY() + " / "
@@ -88,6 +90,7 @@ public class CompassRightClick implements Listener {
 
     meta.lore(lore);
     compass.setItemMeta(meta);
+
   }
 
   /**
@@ -144,7 +147,7 @@ public class CompassRightClick implements Listener {
       //Set info
       SkullMeta meta = (SkullMeta) skull.getItemMeta();
       meta.setOwningPlayer(p);
-      String dist = formatDistance(playerDistance.getDistance());
+      String dist = Format.formatDistance(playerDistance.getDistance());
       meta.displayName(Component.text(p.getName()).append(Component.text(dist)));
       skull.setItemMeta(meta);
 
@@ -155,21 +158,6 @@ public class CompassRightClick implements Listener {
     headsArray = headsList.toArray(headsArray);
 
     return headsArray;
-  }
-
-  /**
-   * Formats the distance in meters. Ex. (700m) or (5.1km)
-   *
-   * @param distance the distance to format
-   * @return returns a string with the distanceSquared and units
-   */
-  @Contract(pure = true)
-  private static @NotNull String formatDistance(double distance) {
-    if (distance >= 1000) {
-      return " (" + String.format("%.1f", distance / 1000) + "km)";
-    }
-
-    return " (" + (int) distance + "m)";
   }
 
 }
