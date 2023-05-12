@@ -1,4 +1,4 @@
-package dev.michaud.greenpanda.playercompass.util;
+package dev.michaud.greenpanda.explorerstoolkit.util;
 
 import java.util.ArrayList;
 import java.util.Collections;

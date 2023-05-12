@@ -1,7 +1,7 @@
-name: PlayerCompass
+name: ExplorersToolkit
 version: '${project.version}'
-main: dev.michaud.greenpanda.playercompass.PlayerCompass
+main: dev.michaud.greenpanda.explorerstoolkit.ExplorersToolkit
 api-version: 1.19
 authors: [ PandaDev ]
 depend: [ GreenPandaCore ]
-description: Adds a player compass that can be used to find other players
+description: Makes it much easier and viable to explore without using the F3 menu for navigation

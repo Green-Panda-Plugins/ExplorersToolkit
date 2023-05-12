@@ -1,4 +1,4 @@
-package dev.michaud.greenpanda.playercompass.util;
+package dev.michaud.greenpanda.explorerstoolkit.util;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

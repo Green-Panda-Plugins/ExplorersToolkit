@@ -1,8 +1,8 @@
-package dev.michaud.greenpanda.playercompass.items;
+package dev.michaud.greenpanda.explorerstoolkit.items;
 
-import dev.michaud.greenpanda.core.item.Craftable;
 import dev.michaud.greenpanda.core.item.ItemRegistry;
-import dev.michaud.greenpanda.playercompass.PlayerCompass;
+import dev.michaud.greenpanda.core.item.RecipeUnlockable;
+import dev.michaud.greenpanda.explorerstoolkit.ExplorersToolkit;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
@@ -16,27 +16,17 @@ import org.bukkit.inventory.meta.CompassMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-public class Compass implements Craftable {
-
-  public static Compass customItem;
-  public static ItemStack itemStack;
-
-  public static void init() {
-    customItem = new Compass();
-    itemStack = customItem.makeItem();
-
-    ItemRegistry.registerItem(customItem);
-  }
+public class PlayerCompass implements RecipeUnlockable {
 
   @Override
   public @NotNull JavaPlugin getOwnerPlugin() {
-    return PlayerCompass.getPlugin();
+    return ExplorersToolkit.getPlugin();
   }
 
   @Override
   public @NotNull ItemStack makeItem() {
 
-    ItemStack item = Craftable.super.makeItem();
+    ItemStack item = RecipeUnlockable.super.makeItem();
 
     CompassMeta meta = (CompassMeta) item.getItemMeta();
 
@@ -48,7 +38,6 @@ public class Compass implements Craftable {
     item.setItemMeta(meta);
 
     return item;
-
   }
 
   @Override
@@ -63,7 +52,7 @@ public class Compass implements Craftable {
 
   @Override
   public @NotNull Component displayName() {
-    return Component.text("Player Compass")
+    return Component.translatable("greenpanda.item.playerCompass")
         .decoration(TextDecoration.ITALIC, false);
   }
 
@@ -73,8 +62,13 @@ public class Compass implements Craftable {
   }
 
   @Override
+  public @NotNull Material recipeRequirement() {
+    return Material.COMPASS;
+  }
+
+  @Override
   public @NotNull Recipe recipe() {
-    ShapedRecipe recipe = new ShapedRecipe(namespacedKey(), itemStack);
+    ShapedRecipe recipe = new ShapedRecipe(namespacedKey(), makeItem());
     recipe.shape(
         "AAA",
         "ACA",
@@ -85,10 +79,9 @@ public class Compass implements Craftable {
     return recipe;
   }
 
-  public boolean hasInInventory(@NotNull Player player) {
-
+  public static boolean hasInInventory(@NotNull Player player) {
     for (ItemStack item : player.getInventory()) {
-      if (isType(item)) {
+      if (ItemRegistry.isCustomItem(PlayerCompass.class, item)) {
         return true;
       }
     }
@@ -96,15 +89,14 @@ public class Compass implements Craftable {
     return false;
   }
 
-  public void setLocation(@NotNull ItemStack compass, Location location) {
+  public static void setLocation(@NotNull ItemStack compass, Location location) {
     CompassMeta compassMeta = (CompassMeta) compass.getItemMeta();
     compassMeta.setLodestoneTracked(false);
     compassMeta.setLodestone(location);
     compass.setItemMeta(compassMeta);
   }
 
-  public void clearLocation(@NotNull ItemStack compass) {
-
+  public static void clearLocation(@NotNull ItemStack compass) {
     //BS location
     Location loc = new Location(
         Bukkit.getServer().getWorlds().get(0),
